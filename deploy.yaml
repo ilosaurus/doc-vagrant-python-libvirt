@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: create dir for repo as sudo
+      file:
+        path: /webapps/devops
+        state: directory
+        owner: vagrant
+        group: vagrant

@@ -2,6 +2,39 @@
 - hosts: all
   become: yes
   tasks:
+    - name: Ansible delete file /etc/resolv.conf
+      file:
+        path: /etc/resolv.conf
+        state: absent
+
+    - name: Update entry into /etc/resolv.conf
+      lineinfile:
+        path: /etc/resolv.conf
+        line: 'nameserver 1.1.1.1'
+        create: yes
+
+    - name: Install Package Python 3.6
+      apt:
+        name: python3.6
+        state: present
+        update_cache: yes
+
+    - name: Install Package pip3
+      apt:
+        name: python3-pip
+        state: present
+        update_cache: yes
+
+    - name: Install Package 'virtualenv' 
+      pip:
+        name: virtualenv
+        executable: pip3
+
+    - name: install flask with pip3
+      pip: 
+        name: flask
+        executable: pip3
+        
     - name: create dir for repo as sudo
       file:
         path: /webapps/devops

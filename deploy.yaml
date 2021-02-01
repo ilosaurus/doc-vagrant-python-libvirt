@@ -56,17 +56,23 @@
 
     - name: Copy nginx config file
       copy:
-        src: app.conf
-        dest: /etc/nginx/sites-available/anginxpp.conf
+        src: nginx.conf
+        dest: /etc/nginx/sites-available/app.conf
         owner: root
         group: root
         mode: 0644
         backup: yes
 
-    - name: Manage the state of program group to be in started state
+    - name: Reload supervisor configuration
       community.general.supervisorctl:
         name: 'app:'
-        state: started
+        state: present
+
+    - name: Restart supervisor
+      community.general.supervisorctl:
+        name: 'app:'
+        state: restarted
+      ignore_errors: yes
 
     # - name: Launch flask website
     #   shell: "cd /webapps/devops; sudo nohup flask run --host 10.10.10.20 --port 80 2>&1 >/dev/null &"

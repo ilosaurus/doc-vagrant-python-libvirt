@@ -13,31 +13,67 @@
         line: 'nameserver 1.1.1.1'
         create: yes
 
-    - name: Install Package Python 3.6
-      apt:
-        name: python3.6
-        state: present
-        update_cache: yes
-
-    - name: Install Package pip3
-      apt:
-        name: python3-pip
-        state: present
-        update_cache: yes
-
-    - name: Install Package 'virtualenv' 
-      pip:
-        name: virtualenv
-        executable: pip3
-
-    - name: install flask with pip3
-      pip: 
-        name: flask
-        executable: pip3
-        
-    - name: create dir for repo as sudo
+    - name: create production apps directory
       file:
         path: /webapps/devops
         state: directory
         owner: vagrant
         group: vagrant
+
+    - name: Unarchive apps to env production
+      become: no
+      unarchive:
+        src: https://github.com/lumbans/devops-la-challenges/archive/master.zip
+        dest: /webapps/devops
+        extra_opts: "-j"
+        remote_src: yes
+
+    - name: Update all packages to their latest version
+      apt:
+        name: "*"
+        state: latest
+
+    - name: Install Dependencies
+      apt:
+        name: ['python-pip', 'unzip', 'gunicorn', 'supervisor', 'nginx']
+        state: present
+        update_cache: yes
+
+    - name: install flask with pip
+      become: no
+      pip: 
+        name: ['flask', werkzeug==0.16.0]
+        executable: pip
+
+    - name: Copy supervisor config file
+      copy:
+        src: app.conf
+        dest: /etc/supervisor/conf.d/app.conf
+        owner: root
+        group: root
+        mode: 0644
+        backup: yes
+
+    - name: Copy nginx config file
+      copy:
+        src: app.conf
+        dest: /etc/nginx/sites-available/anginxpp.conf
+        owner: root
+        group: root
+        mode: 0644
+        backup: yes
+
+    - name: Manage the state of program group to be in started state
+      community.general.supervisorctl:
+        name: 'app:'
+        state: started
+
+    # - name: Launch flask website
+    #   shell: "cd /webapps/devops; sudo nohup flask run --host 10.10.10.20 --port 80 2>&1 >/dev/null &"
+
+    # - name: clone apps repo
+    #   become: no 
+    #   git:
+    #     repo: 'https://github.com/lumbans/devops-la-challenges.git'
+    #     dest: /webapps/devops
+        

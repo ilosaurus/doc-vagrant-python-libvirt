@@ -67,6 +67,7 @@
       community.general.supervisorctl:
         name: 'app:'
         state: present
+      ignore_errors: yes
 
     - name: Restart supervisor
       community.general.supervisorctl:
